@@ -66,13 +66,19 @@ def detect_algorithm_category(code: str) -> str:
     """
     Detect which algorithm category based on code keywords.
     
+    IMPORTANT: Check specific categories (graph, tree) BEFORE general ones (sorting)
+    to avoid misclassification (e.g., topoSort as sorting instead of graph)
+    
     Returns category name or "sorting" as default
     """
     code_lower = code.lower()
     
-    # Check each category's keywords
-    for category, config in CATEGORY_CONFIG.items():
-        for keyword in config["keywords"]:
+    # Priority order: Check specific categories first
+    priority_order = ["graph", "tree", "linkedlist", "stack_queue", "searching", "sorting"]
+    
+    for category in priority_order:
+        config = CATEGORY_CONFIG.get(category, {})
+        for keyword in config.get("keywords", []):
             if keyword in code_lower:
                 return category
     
@@ -118,11 +124,27 @@ def validate_sorting_complete(frames: List[Dict[str, Any]]) -> bool:
 
 def validate_searching_complete(frames: List[Dict[str, Any]]) -> bool:
     """Check if search concluded (found or not found)"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
     if not frames:
+        logger.warning("No frames to validate for searching")
         return False
     
-    last_desc = frames[-1].get("description", "").lower()
-    return "found" in last_desc or "not found" in last_desc
+    last_frame = frames[-1]
+    last_desc = last_frame.get("description", "").lower()
+    
+    # Check if found or not found in description
+    found_in_desc = ("found" in last_desc or "not found" in last_desc)
+    
+    # Also check variables for found flag
+    variables = last_frame.get("variables", [])
+    found_var = any(v.get("name") == "found" for v in variables)
+    
+    is_complete = found_in_desc or found_var
+    
+    logger.info(f"Searching validation: desc='{last_desc[:50]}', has_found_var={found_var}, complete={is_complete}")
+    return is_complete
 
 
 def validate_tree_complete(frames: List[Dict[str, Any]]) -> bool:
