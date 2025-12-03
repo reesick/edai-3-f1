@@ -49,19 +49,42 @@ FRAME|0|array|5,2,8,1|i=0 j=0|7|Initial array state
 FRAME|1|array|2,5,8,1|i=0 j=1|9|Swapped arr[0] and arr[1]
 FRAME|2|array|2,5,8,1|i=0 j=2|7|Comparing arr[2] and arr[3]
 
-For tree traversal:
-FRAME|0|tree|node:5,left:3,right:7|current=5|10|Visit root
-FRAME|1|tree|node:3,left:1,right:4|current=3|12|Traverse left
+For tree (BST with nodes 20,8,22,4,12):
+FRAME|0|tree|values:20,8,22,4,12 structure:0L1-0R2-1L3-1R4|root=20|10|Insert node 20 as root
+FRAME|1|tree|values:20,8,22,4,12 structure:0L1-0R2-1L3-1R4|root=20 current=8|12|Insert node 8 to left
 
-For graph:
-FRAME|0|graph|edges:0-1,0-2|visited:0|15|Start at node 0
-FRAME|1|graph|edges:0-1,0-2,1-3|visited:0,1|16|Visit neighbor 1
+Format for tree:
+- values: comma-separated node values
+- structure: parent-child links (0L1 = node 0's left child is node 1, 0R2 = node 0's right child is node 2)
 
-IMPORTANT: Generate 25-30 frames minimum showing EVERY significant step.
+For graph (Topological Sort with 6 nodes):
+FRAME|0|graph|nodes:0,1,2,3,4,5 edges:5-2,5-0,4-0,4-1,2-3,3-1 visited:|indegree computed|15|Computed indegrees
+FRAME|1|graph|nodes:0,1,2,3,4,5 edges:5-2,5-0,4-0,4-1,2-3,3-1 visited:4,5|queue=4,5|18|Nodes with indegree 0
+FRAME|2|graph|nodes:0,1,2,3,4,5 edges:5-2,5-0,4-0,4-1,2-3,3-1 visited:4,5,0|processing 4|25|Process node 4
+
+Format for graph:
+- nodes: comma-separated node IDs (0,1,2,3)
+- edges: directed edges with - or > (5-2 means edge from 5 to 2)
+- visited: comma-separated visited node IDs (color green)
+
+IMPORTANT: Generate as many frames as needed (no limit) to show COMPLETE algorithm execution.
 For recursive algorithms (Quick Sort, DFS, etc.), show EACH recursive call.
 For sorting, show EACH comparison and swap.
 
-Return ONLY the FRAME lines, nothing else. Do not stop early.
+🚨 CRITICAL COMPLETION REQUIREMENTS 🚨
+1. For SORTING algorithms: Last frame MUST show FULLY SORTED ARRAY
+2. For SEARCHING algorithms: Last frame MUST show "Element FOUND at index X" or "Element NOT FOUND"
+3. For TREE algorithms: Last frame MUST show complete tree structure
+4. For GRAPH algorithms: Last frame MUST show all visited nodes or complete path
+5. DO NOT STOP until algorithm is 100% COMPLETE
+
+Example for Quick Sort:
+- Show EVERY partition step
+- Show EVERY recursive call (left and right)
+- Show EVERY swap
+- FINAL FRAME must show: [11, 12, 22, 25, 34, 45, 50, 64, 88, 90] (fully sorted)
+
+Return ONLY the FRAME lines, nothing else. Generate AS MANY FRAMES AS NEEDED until algorithm COMPLETES.
 """
 
 
@@ -82,14 +105,14 @@ async def generate_simple_visualization(
     gemini_model: str = "gemini-2.0-flash-exp"
 ) -> Dict[str, Any]:
     """
-    Generate visualization by asking AI for simple text, not JSON.
+    Generate visualization using category-based system with validation.
     
     Process:
-    1. Detect data structures
-    2. Add line numbers to code
-    3. Ask AI for pipe-delimited text
-    4. Parse text into structured JSON
-    5. Return JSON (frontend unchanged)
+    1. Detect algorithm category
+    2. Use category-specific max frames and prompt focus
+    3. Generate frames (multi-part if needed)
+    4. Validate completion
+    5. Request more frames if incomplete
     
     Args:
         code: C++ source code
@@ -100,41 +123,106 @@ async def generate_simple_visualization(
         Complete visualization dict matching GeminiResponse schema
     """
     try:
-        logger.info("Starting simple text-based visualization")
+        from .category_config import (
+            detect_algorithm_category,
+            get_category_max_frames,
+            get_category_prompt_focus,
+            validate_visualization_complete
+        )
+        
+        logger.info("Starting category-based visualization")
+        
+        # Detect category
+        category = detect_algorithm_category(code)
+        max_frames = get_category_max_frames(category)
+        prompt_focus = get_category_prompt_focus(category)
+        
+        logger.info(f"Detected category: {category}, max_frames: {max_frames}")
         
         # Detect data structures
         data_structures = detect_data_structures(code)
-        logger.info(f"Detected data structures: {data_structures}")
         
         # Add line numbers
         numbered_code = add_line_numbers(code)
         
-        # Build prompt
+        # Build category-optimized prompt
         prompt = SIMPLE_PROMPT_TEMPLATE.format(
             numbered_code=numbered_code,
             input_data=input_data or "No input",
             data_structures=", ".join(data_structures)
         )
         
-        # Call AI (asking for TEXT, not JSON)
+        # Add category-specific instructions
+        prompt += f"\n\nCATEGORY: {category.upper()}\n"
+        prompt += f"FOCUS: {prompt_focus}\n"
+        prompt += "🚨 GENERATE AS MANY FRAMES AS NEEDED - NO LIMIT\n"
+        prompt += "Show COMPLETE algorithm execution from start to FINAL STATE.\n"
+        
+        # Call AI
         model = genai.GenerativeModel(model_name=gemini_model)
         response = model.generate_content(
             prompt,
             generation_config={
                 "temperature": 0.0,
-                "max_output_tokens": 4096  # INCREASED: More tokens for complex algorithms like Quick Sort
+                "max_output_tokens": 8192  # INCREASED: No frame limits, allow complete execution
             }
         )
         
         ai_text = response.text.strip()
-        logger.info(f"AI returned {len(ai_text)} characters of text")
+        logger.info(f"AI returned {len(ai_text)} characters")
         
         # Parse text into JSON
         result = parse_ai_text_output(ai_text)
+        frames = result['visualization']['frames']
         
-        logger.info(f"Successfully parsed {result['metadata']['total_frames']} frames")
+        logger.info(f"Generated {len(frames)} frames")
+        
+        # Validate completion
+        is_complete = validate_visualization_complete(category, frames)
+        
+        if not is_complete:
+            logger.warning(f"Visualization incomplete for {category}. Requesting completion frames...")
+            
+            # Request completion frames
+            completion_prompt = f"""The previous visualization was incomplete.
+            
+LAST FRAME WAS:
+{frames[-1] if frames else 'None'}
+
+Generate 10-15 MORE frames to COMPLETE the algorithm.
+For sorting: Show the FINAL SORTED ARRAY.
+For searching: Show element FOUND or NOT FOUND.
+Continue in same format: FRAME|id|type|data|vars|line|desc
+Start from frame {len(frames)}
+"""
+            
+            completion_response = model.generate_content(
+                completion_prompt,
+                generation_config={
+                    "temperature": 0.0,
+                    "max_output_tokens": 2048
+                }
+            )
+            
+            # Parse completion frames
+            completion_text = completion_response.text.strip()
+            completion_result = parse_ai_text_output(completion_text)
+            completion_frames = completion_result['visualization']['frames']
+            
+            # Merge frames
+            for cf in completion_frames:
+                cf['frame_id'] = len(frames)
+                frames.append(cf)
+                len(frames)
+            
+            result['visualization']['frames'] = frames
+            result['metadata']['total_frames'] = len(frames)
+            
+            logger.info(f"Added {len(completion_frames)} completion frames. Total: {len(frames)}")
+        
+        logger.info(f"Category-based visualization complete: {len(frames)} frames")
         return result
         
     except Exception as e:
-        logger.error(f"Simple visualization failed: {e}")
+        logger.error(f"Category-based visualization failed: {e}")
         raise GeminiServiceError(f"Visualization generation failed: {e}")

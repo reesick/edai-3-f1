@@ -36,50 +36,153 @@ def parse_variables(vars_str: str) -> List[Dict[str, Any]]:
     return variables
 
 
-def parse_tree_data(data: str) -> List[Dict[str, Any]]:
-    """Parse tree nodes: 'node:5,left:3,right:7' -> tree structure"""
-    if not data or data == 'null':
-        return []
+def parse_tree_data(data: str) -> Dict[str, Any]:
+    """
+    Parse tree nodes and build proper tree structure for TreeVisualizer.
     
-    trees = []
-    # Simple parser for now - can enhance later
-    parts = data.split(',')
-    for part in parts:
-        if ':' in part:
-            key, val = part.split(':', 1)
-            if key.strip() == 'node':
-                trees.append({
-                    "value": int(val.strip()),
-                    "x": 0,
-                    "y": 0,
-                    "highlighted": True
-                })
-    return trees
+    Format: 'values:20,8,22,4,12,10,14 structure:0L1-0R2-1L3-1R4-4L5-4R6'
+    OR simple: '20,8,22,4,12' (values in level-order)
+    
+    Returns tree dict with nodes array containing id, value, x, y, left_child_id, right_child_id
+    """
+    if not data or data == 'null':
+        return {"name": "Tree", "type": "Binary Tree", "nodes": []}
+    
+    nodes = []
+    
+    # Parse format: values:20,8,22 structure:0L1-0R2
+    if 'values:' in data and 'structure:' in data:
+        parts = data.split()
+        values_str = next((p.split(':')[1] for p in parts if p.startswith('values:')), '')
+        structure_str = next((p.split(':')[1] for p in parts if p.startswith('structure:')), '')
+        
+        values = [int(v.strip()) for v in values_str.split(',') if v.strip()]
+        
+        # Build nodes with IDs
+        for i, val in enumerate(values):
+            nodes.append({
+                "id": i,
+                "value": val,
+                "x": 0,  # Will calculate layout
+                "y": 0,
+                "highlighted": False,
+                "left_child_id": None,
+                "right_child_id": None,
+                "color": "default"
+            })
+        
+        # Parse structure links: 0L1 means node 0's left child is node 1
+        if structure_str:
+            for link in structure_str.split('-'):
+                if 'L' in link:
+                    parent_id, child_id = link.split('L')
+                    nodes[int(parent_id)]["left_child_id"] = int(child_id)
+                elif 'R' in link:
+                    parent_id, child_id = link.split('R')
+                    nodes[int(parent_id)]["right_child_id"] = int(child_id)
+    
+    else:
+        # Simple format: just values (build BST structure)
+        values = [int(v.strip()) for v in data.split(',') if v.strip() and v.strip() != 'null']
+        for i, val in enumerate(values):
+            nodes.append({
+                "id": i,
+                "value": val,
+                "x": 0,
+                "y": 0,
+                "highlighted": False,
+                "left_child_id": None,
+                "right_child_id": None,
+                "color": "default"
+            })
+    
+    # Calculate x, y positions (simple binary tree layout)
+    if nodes:
+        _calculate_tree_layout(nodes)
+    
+    return {"name": "Tree", "type": "Binary Tree", "nodes": nodes}
+
+
+def _calculate_tree_layout(nodes: List[Dict[str, Any]], node_id: int = 0, x: int = 200, y: int = 50, h_spacing: int = 100, v_spacing: int = 80, level: int = 0):
+    """Calculate x,y coordinates for tree nodes (recursive layout)"""
+    if node_id >= len(nodes):
+        return
+    
+    node = nodes[node_id]
+    node["x"] = x
+    node["y"] = y
+    
+    # Layout left and right children
+    offset = h_spacing / (2 ** level) if level > 0 else h_spacing
+    
+    if node["left_child_id"] is not None:
+        _calculate_tree_layout(nodes, node["left_child_id"], x - offset, y + v_spacing, h_spacing, v_spacing, level + 1)
+    
+    if node["right_child_id"] is not None:
+        _calculate_tree_layout(nodes, node["right_child_id"], x + offset, y + v_spacing, h_spacing, v_spacing, level + 1)
 
 
 def parse_graph_data(data: str) -> Dict[str, Any]:
-    """Parse graph: 'edges:0-1,0-2 visited:0,1' -> graph structure"""
+    """
+    Parse graph: 'nodes:0,1,2,3,4,5 edges:5-2,5-0,4-0,4-1,2-3,3-1 visited:4,5'
+    
+    Returns graph dict with nodes and edges arrays for GraphVisualizer
+    """
     if not data or data == 'null':
-        return {"nodes": [], "edges": []}
+        return {"name": "Graph", "directed": True, "nodes": [], "edges": []}
     
     nodes = []
     edges = []
+    visited_set = set()
     
-    # Parse format: edges:0-1,0-2 visited:0,1
+    # Parse format: nodes:0,1,2 edges:0-1,0-2 visited:0,1
     parts = data.split()
-    for part in parts:
-        if part.startswith('edges:'):
-            edge_list = part[6:].split(',')
-            for edge in edge_list:
-                if '-' in edge:
-                    from_node, to_node = edge.split('-')
-                    edges.append({
-                        "from": int(from_node.strip()),
-                        "to": int(to_node.strip()),
-                        "weight": 1
-                    })
     
-    return {"nodes": nodes, "edges": edges}
+    # Extract nodes
+    nodes_str = next((p.split(':')[1] for p in parts if p.startswith('nodes:')), '')
+    if nodes_str:
+        node_ids = [int(n.strip()) for n in nodes_str.split(',') if n.strip()]
+        for nid in node_ids:
+            nodes.append({
+                "id": nid,
+                "label": str(nid),
+                "visited": False,
+                "color": "#555"
+            })
+    
+    # Extract edges
+    edges_str = next((p.split(':')[1] for p in parts if p.startswith('edges:')), '')
+    if edges_str:
+        edge_list = edges_str.split(',')
+        for edge in edge_list:
+            if '-' in edge or '>' in edge:
+                # Support both 0-1 and 0>1 formats
+                separator = '>' if '>' in edge else '-'
+                from_node, to_node = edge.split(separator)
+                edges.append({
+                    "from": int(from_node.strip()),
+                    "to": int(to_node.strip()),
+                    "weight": 1,
+                    "highlighted": False
+                })
+    
+    # Extract visited nodes
+    visited_str = next((p.split(':')[1] for p in parts if p.startswith('visited:')), '')
+    if visited_str:
+        visited_ids = [int(v.strip()) for v in visited_str.split(',') if v.strip()]
+        visited_set = set(visited_ids)
+        # Mark visited nodes
+        for node in nodes:
+            if node["id"] in visited_set:
+                node["visited"] = True
+                node["color"] = "#4CAF50"  # Green for visited
+    
+    return {
+        "name": "Graph",
+        "directed": True,
+        "nodes": nodes,
+        "edges": edges
+    }
 
 
 def parse_linkedlist_data(data: str) -> List[Dict[str, Any]]:
@@ -147,7 +250,9 @@ def build_frame_from_line(line: str, frame_id: int) -> Dict[str, Any]:
             "highlights": {"indices": [], "colors": [], "labels": []}
         }]
     elif ds_type == 'tree':
-        frame["trees"] = parse_tree_data(data)
+        tree_data = parse_tree_data(data)
+        if tree_data and tree_data.get("nodes"):
+            frame["trees"] = [tree_data]
     elif ds_type == 'graph':
         graph_data = parse_graph_data(data)
         frame["graphs"] = [graph_data]
@@ -185,6 +290,21 @@ def parse_ai_text_output(text: str) -> Dict[str, Any]:
     for i, line in enumerate(lines):
         try:
             frame, line_num = build_frame_from_line(line, i)
+            
+            # Skip blank frames (no data structures)
+            has_data = (
+                frame.get("arrays") or 
+                frame.get("trees") or 
+                frame.get("graphs") or 
+                frame.get("linked_lists") or 
+                frame.get("stacks") or 
+                frame.get("queues")
+            )
+            
+            if not has_data:
+                print(f"Skipping blank frame {i}")
+                continue
+            
             frames.append(frame)
             
             # Build line sync mapping
