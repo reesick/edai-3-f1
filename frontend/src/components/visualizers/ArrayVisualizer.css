@@ -1,0 +1,85 @@
+.array-visualizer {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.array-container {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 20px;
+    min-height: 180px;
+}
+
+.array-element {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}
+
+.element-label {
+    font-size: 12px;
+    color: #ffd700;
+    font-weight: 600;
+    background: rgba(255, 215, 0, 0.15);
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+.array-bar {
+    min-width: 40px;
+    max-width: 60px;
+    border-radius: 6px 6px 0 0;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.array-bar.highlighted {
+    animation: pulse 0.8s ease-in-out infinite;
+    box-shadow: 0 0 20px currentColor;
+}
+
+.array-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    font-family: 'Consolas', 'Monaco', monospace;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.array-index {
+    font-size: 12px;
+    color: #888;
+    font-family: 'Consolas', 'Monaco', monospace;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 8px;
+    border-radius: 4px;
+    min-width: 30px;
+    text-align: center;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+        filter: brightness(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+        filter: brightness(1.3);
+    }
+}

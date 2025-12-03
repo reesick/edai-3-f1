@@ -1,0 +1,50 @@
+.tree-visualizer {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tree-svg {
+    width: 100%;
+    height: auto;
+    min-height: 300px;
+    max-height: 500px;
+}
+
+.tree-edge {
+    stroke-width: 2;
+    transition: stroke 0.3s ease;
+}
+
+.tree-node {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.tree-node.highlighted {
+    animation: nodeGlow 1s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px currentColor);
+}
+
+.tree-node-text {
+    fill: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Consolas', 'Monaco', monospace;
+    pointer-events: none;
+    user-select: none;
+}
+
+@keyframes nodeGlow {
+
+    0%,
+    100% {
+        filter: drop-shadow(0 0 8px currentColor);
+    }
+
+    50% {
+        filter: drop-shadow(0 0 16px currentColor);
+    }
+}
