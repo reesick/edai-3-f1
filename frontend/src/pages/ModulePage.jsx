@@ -158,7 +158,9 @@ export default function ModulePage() {
                         <div className="panel viz-section">
                             <Visualizer
                                 module={moduleName}
-                                data={trace[Math.min(currentStep, trace.length - 1)]?.data}
+                                data={moduleName === 'trees'
+                                    ? trace[Math.min(currentStep, trace.length - 1)]
+                                    : trace[Math.min(currentStep, trace.length - 1)]?.data}
                                 highlights={trace[Math.min(currentStep, trace.length - 1)]?.highlights || []}
                                 controlsProps={{
                                     isPlaying,

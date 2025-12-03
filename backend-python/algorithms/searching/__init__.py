@@ -1,12 +1,14 @@
 """Searching algorithms package"""
 from .linear_search import execute as linear_execute, CODE_SAMPLE as linear_sample
 from .sentinel_search import execute as sentinel_execute, CODE_SAMPLE as sentinel_sample
+from .binary_search import execute as binary_execute, CODE_SAMPLE as binary_sample
 from .fibonacci_search import execute as fibonacci_execute, CODE_SAMPLE as fibonacci_sample
 from .indexed_sequential_search import execute as indexed_execute, CODE_SAMPLE as indexed_sample
 
 OPERATIONS = [
     {"id": "linear", "name": "Linear Search"},
     {"id": "sentinel", "name": "Sentinel Search"},
+    {"id": "binary", "name": "Binary Search"},
     {"id": "fibonacci", "name": "Fibonacci Search"},
     {"id": "indexed", "name": "Indexed Sequential Search"},
 ]
@@ -14,6 +16,7 @@ OPERATIONS = [
 CODE_SAMPLES = {
     "linear": linear_sample,
     "sentinel": sentinel_sample,
+    "binary": binary_sample,
     "fibonacci": fibonacci_sample,
     "indexed": indexed_sample,
 }
@@ -24,6 +27,8 @@ def execute(operation, params):
         return linear_execute(params)
     elif operation == "sentinel":
         return sentinel_execute(params)
+    elif operation == "binary":
+        return binary_execute(params)
     elif operation == "fibonacci":
         return fibonacci_execute(params)
     elif operation == "indexed":

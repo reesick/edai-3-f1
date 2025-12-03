@@ -9,6 +9,20 @@ const TreeVisualizer = ({ data }) => {
 
     const nodeMap = new Map(data.nodes.map(node => [node.id, node]));
 
+    // Extract highlights
+    const highlights = data.highlights || { node_ids: [], colors: [], labels: [] };
+    const highlightMap = new Map();
+
+    // Build highlight map for quick lookup
+    if (highlights.node_ids) {
+        highlights.node_ids.forEach((nodeId, index) => {
+            highlightMap.set(nodeId, {
+                color: highlights.colors?.[index] || '#f39c12',
+                label: highlights.labels?.[index] || null
+            });
+        });
+    }
+
     // Calculate SVG viewBox
     const margin = 60;
     const maxX = Math.max(...data.nodes.map(n => n.x)) + margin;
@@ -16,7 +30,7 @@ const TreeVisualizer = ({ data }) => {
 
     return (
         <div className="tree-visualizer">
-            <div className="structure-label">{data.name} ({data.type})</div>
+            <div className="structure-label">{data.name}</div>
             <svg
                 className="tree-svg"
                 viewBox={`0 0 ${maxX} ${maxY}`}
@@ -25,6 +39,7 @@ const TreeVisualizer = ({ data }) => {
                 {/* Draw edges first (so they appear under nodes) */}
                 {data.nodes.map(node => {
                     const lines = [];
+                    const isHighlighted = highlightMap.has(node.id);
 
                     // Left child edge
                     if (node.left_child_id !== null && node.left_child_id !== undefined) {
@@ -38,7 +53,8 @@ const TreeVisualizer = ({ data }) => {
                                     x2={leftChild.x}
                                     y2={leftChild.y}
                                     className="tree-edge"
-                                    stroke={node.highlighted ? '#4f9bff' : '#555'}
+                                    stroke={isHighlighted ? '#95a5a6' : '#555'}
+                                    strokeWidth={isHighlighted ? '3' : '2'}
                                 />
                             );
                         }
@@ -56,7 +72,8 @@ const TreeVisualizer = ({ data }) => {
                                     x2={rightChild.x}
                                     y2={rightChild.y}
                                     className="tree-edge"
-                                    stroke={node.highlighted ? '#4f9bff' : '#555'}
+                                    stroke={isHighlighted ? '#95a5a6' : '#555'}
+                                    strokeWidth={isHighlighted ? '3' : '2'}
                                 />
                             );
                         }
@@ -67,21 +84,27 @@ const TreeVisualizer = ({ data }) => {
 
                 {/* Draw nodes */}
                 {data.nodes.map(node => {
-                    const nodeColor = node.highlighted
-                        ? (node.color === 'default' ? '#4f9bff' : node.color)
-                        : (node.color === 'default' ? '#3498db' : node.color);
+                    const highlight = highlightMap.get(node.id);
+                    const nodeColor = highlight ? highlight.color : '#3498db';
+                    const isHighlighted = highlight !== undefined;
 
                     return (
                         <g key={`node-${node.id}`} className="tree-node-group">
+                            {/* Node circle with glow effect for highlighted nodes */}
                             <circle
                                 cx={node.x}
                                 cy={node.y}
                                 r="25"
                                 fill={nodeColor}
-                                className={`tree-node ${node.highlighted ? 'highlighted' : ''}`}
+                                className={`tree-node ${isHighlighted ? 'highlighted' : ''}`}
                                 stroke="#fff"
                                 strokeWidth="2"
+                                style={isHighlighted ? {
+                                    filter: 'drop-shadow(0 0 8px ' + nodeColor + ')'
+                                } : {}}
                             />
+
+                            {/* Node value */}
                             <text
                                 x={node.x}
                                 y={node.y}
@@ -91,6 +114,21 @@ const TreeVisualizer = ({ data }) => {
                             >
                                 {node.value}
                             </text>
+
+                            {/* Label above node */}
+                            {highlight && highlight.label && (
+                                <text
+                                    x={node.x}
+                                    y={node.y - 40}
+                                    className="tree-node-label"
+                                    textAnchor="middle"
+                                    fill={nodeColor}
+                                    fontWeight="bold"
+                                    fontSize="12"
+                                >
+                                    {highlight.label}
+                                </text>
+                            )}
                         </g>
                     );
                 })}

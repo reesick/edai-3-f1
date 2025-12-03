@@ -4,29 +4,34 @@ import './HomePage.css';
 
 const MODULES = [
     {
-        id: 'array',
-        name: 'Array',
-        description: 'Basic array operations - access, insert, delete, search'
-    },
-    {
         id: 'sorting',
         name: 'Sorting',
-        description: 'Bubble, Selection, Insertion, Merge, Quick Sort'
+        description: 'Bubble, Selection, Insertion, Quick, Shell, Counting, Radix, Bucket'
     },
     {
-        id: 'bitmask',
-        name: 'Bitmask',
-        description: 'Bit manipulation - set, clear, toggle, check bits'
+        id: 'searching',
+        name: 'Searching',
+        description: 'Linear, Sentinel, Binary, Fibonacci, Indexed Sequential'
+    },
+    {
+        id: 'trees',
+        name: 'Trees 🌲',
+        description: 'BST Insert/Search/Delete, Tree Traversals, LCA in BST'
     },
     {
         id: 'linkedlist',
         name: 'Linked List',
-        description: 'Insert, delete, search, reverse linked nodes'
+        description: 'Create, Traverse, Search, Insert, Delete, Sort, Concatenate'
     },
     {
-        id: 'binaryheap',
-        name: 'Binary Heap',
-        description: 'Min/Max heap - insert, extract, heapify'
+        id: 'stack',
+        name: 'Stack',
+        description: 'Push, Pop, Infix/Postfix, Balanced Parentheses'
+    },
+    {
+        id: 'queue',
+        name: 'Queue',
+        description: 'Enqueue, Dequeue, Circular, Priority, Deque'
     },
     {
         id: 'custom',

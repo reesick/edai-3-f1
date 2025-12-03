@@ -1,5 +1,6 @@
 import React from 'react';
 import VisualizerControls from './VisualizerControls';
+import VisualizerFactory from './visualizers/VisualizerFactory';
 import './Visualizer.css';
 
 export default function Visualizer({ module, data, highlights = [], controlsProps }) {
@@ -29,8 +30,11 @@ export default function Visualizer({ module, data, highlights = [], controlsProp
                 return <BitmaskVisualizer data={data} highlights={highlights} />;
             case 'binaryheap':
                 return <HeapVisualizer data={data} highlights={highlights} />;
+            case 'trees':
+                // Trees use the VisualizerFactory which handles complex frame structures
+                return <VisualizerFactory frame={data} />;
             default:
-                return <div>Unsupported module type</div>;
+                return <div>Unsupported module type: {module}</div>;
         }
     };
 

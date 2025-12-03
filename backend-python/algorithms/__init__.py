@@ -3,6 +3,7 @@
 # Import category modules
 from .sorting import OPERATIONS as SORTING_OPS, CODE_SAMPLES as SORTING_SAMPLES, execute as sorting_execute
 from .searching import OPERATIONS as SEARCHING_OPS, CODE_SAMPLES as SEARCHING_SAMPLES, execute as searching_execute
+from .trees import OPERATIONS as TREES_OPS, CODE_SAMPLES as TREES_SAMPLES, execute as trees_execute
 
 # Module registry
 MODULES = {
@@ -19,6 +20,13 @@ MODULES = {
         "operations": SEARCHING_OPS,
         "code": SEARCHING_SAMPLES,
         "execute": searching_execute,
+    },
+    "trees": {
+        "name": "Tree Algorithms",
+        "icon": "🌲",
+        "operations": TREES_OPS,
+        "code": TREES_SAMPLES,
+        "execute": trees_execute,
     },
 }
 
