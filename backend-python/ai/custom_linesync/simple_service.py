@@ -37,10 +37,17 @@ RULES:
 1. One line per frame
 2. frameId starts at 0
 3. dataStructureType: array, tree, graph, linkedlist, stack, or queue
-4. data: comma-separated values (e.g., "5,2,8,1" for arrays)
+   - Use 'queue' for ANY queue structure (std::queue, circular queue, custom queue struct)
+   - Use 'stack' for ANY stack structure (std::stack, custom stack struct)
+   - Look for queue operations: enqueue/dequeue/push+pop, front/rear pointers
+   - Look for stack operations: push/pop, top pointer
+4. data: comma-separated values ONLY - NO metadata like "f:0 r:0" in data field!
+   - CORRECT: "10,20,30 front_index:0 rear_index:2"
+   - WRONG: "10,20,30, , ,  f:0 r:0 size:0" (no empty commas, no metadata mixed in!)
 5. variables: space-separated name=value pairs (e.g., "i=0 j=1")
 6. lineNumber: the code line causing this state (1-indexed)
 7. description: brief description of what happened
+
 
 EXAMPLES:
 
@@ -145,9 +152,80 @@ FRAME|5|linkedlist|2->1->4->3->5->NULL|k=2|32|Final complete list
 
 - Data: "value1->value2->value3->NULL"
 - Highlights: "highlights:indices=0,1,2 colors=yellow,green,red"
-- Colors: yellow=current, green=new/found, red=delete, blue=normal
 - ALWAYS end with "->NULL"
 - Show step-by-step pointer movements
+
+For stack (LIFO - Last In First Out) operations:
+IMPORTANT: Stack format is bottom-to-top (first element = bottom, last element = top)
+Example: 5,3,8 means 5 is at bottom, 8 is at top
+
+Push operations (adding to stack):
+FRAME|0|stack|5 highlights:indices=0 colors=yellow|top=5 size=1|10|Push 5 - stack now has 1 element (5 is top)
+FRAME|1|stack|5,3 highlights:indices=1 colors=yellow|top=3 size=2|11|Push 3 - new top element (3 on top of 5)
+FRAME|2|stack|5,3,8 highlights:indices=2 colors=yellow|top=8 size=3|12|Push 8 - new top element (8 on top of 3)
+FRAME|3|stack|5,3,8,12 highlights:indices=3 colors=yellow|top=12 size=4|13|Push 12 - new top element
+
+Pop operations (removing from stack):
+FRAME|4|stack|5,3,8 highlights:indices=2 colors=green|top=8 size=3|16|Pop 12 - removed top, 8 is new top
+FRAME|5|stack|5,3 highlights:indices=1 colors=green|top=3 size=2|17|Pop 8 - removed top, 3 is new top
+FRAME|6|stack|5 highlights:indices=0 colors=green|top=5 size=1|18|Pop 3 - removed top, 5 is new top
+
+Stack colors: yellow=push operation, green=pop operation
+Always highlight the TOP element (last index)
+Always show size and top value in variables
+
+CRITICAL FOR EXPRESSION PARSING (INFIX TO POSTFIX):
+Only show OPERATORS in stack, NOT operands!
+Operands (A,B,C) go directly to output - DO NOT add to stack data!
+
+Example - Infix "A+B*C" to postfix:
+FRAME|0|stack||out="" c='A'|10|A is operand, add to output (stack unchanged)
+FRAME|1|stack||out="A" c='+'|12|+ is operator, stack empty, push +
+FRAME|2|stack|+ highlights:indices=0 colors=yellow|out="A" c='+'|12|Pushed + to stack
+FRAME|3|stack|+|out="A" c='B'|10|B is operand, add to output (stack unchanged)
+FRAME|4|stack|+|out="AB" c='*'|12|* is operator, higher precedence than +
+FRAME|5|stack|+,* highlights:indices=1 colors=yellow|out="AB" c='*'|12|Pushed * to stack
+FRAME|6|stack|+,*|out="AB" c='C'|10|C is operand, add to output (stack unchanged)
+FRAME|7|stack|+,*|out="ABC"|15|End of input, pop all from stack
+FRAME|8|stack|+ highlights:indices=0 colors=green|out="ABC*"|15|Popped * to output
+FRAME|9|stack| highlights:indices=0 colors=green|out="ABC*+"|15|Popped + to output
+FRAME|10|stack||out="ABC*+"|20|Final: stack empty, output complete
+
+Stack contents = ONLY operators (+, -, *, /, (, ))
+Output builds with operands (A, B, C) and operators in postfix order
+
+For queue (FIFO - First In First Out) operations:
+IMPORTANT: Queue format is front-to-rear (first element = front, last element = rear)
+Always specify front_index and rear_index
+
+Enqueue operations (adding to rear):
+FRAME|0|queue|5 front_index:0 rear_index:0 highlights:indices=0 colors=yellow|front=0 rear=0 size=1|10|Enqueue 5 - first element (front and rear at 0)
+FRAME|1|queue|5,3 front_index:0 rear_index:1 highlights:indices=1 colors=yellow|front=0 rear=1 size=2|11|Enqueue 3 - added to rear (rear moves to 1)
+FRAME|2|queue|5,3,8 front_index:0 rear_index:2 highlights:indices=2 colors=yellow|front=0 rear=2 size=3|12|Enqueue 8 - added to rear (rear moves to 2)
+FRAME|3|queue|5,3,8,12 front_index:0 rear_index:3 highlights:indices=3 colors=yellow|front=0 rear=3 size=4|13|Enqueue 12 - added to rear
+
+Dequeue operations (removing from front):
+FRAME|4|queue|3,8,12 front_index:0 rear_index:2 highlights:indices=0 colors=green|front=0 rear=2 size=3|16|Dequeue 5 - removed from front (3 is new front)
+FRAME|5|queue|8,12 front_index:0 rear_index:1 highlights:indices=0 colors=green|front=0 rear=1 size=2|17|Dequeue 3 - removed from front (8 is new front)
+FRAME|6|queue|12 front_index:0 rear_index:0 highlights:indices=0 colors=green|front=0 rear=0 size=1|18|Dequeue 8 - removed from front (12 is new front)
+
+Queue colors: yellow=enqueue operation, green=dequeue operation
+Always show front_index and rear_index in data field
+Always show front, rear, and size in variables
+Highlight operation element (newly added or about to be removed)
+
+For circular queue or custom queue structs (detect ANY queue operations):
+If you see: enqueue/dequeue, push+pop together, front/rear pointers, CQueue/CircularQueue struct
+=> Use 'queue' type, NOT 'array'!
+
+Example - Custom circular queue with array a[5], front f, rear r:
+FRAME|0|queue|10 front_index:0 rear_index:0 highlights:indices=0 colors=yellow|f=0 r=0 size=1|10|Enqueue 10 (first element)
+FRAME|1|queue|10,20 front_index:0 rear_index:1 highlights:indices=1 colors=yellow|f=0 r=1 size=2|11|Enqueue 20
+FRAME|2|queue|10,20,30 front_index:0 rear_index:2 highlights:indices=2 colors=yellow|f=0 r=2 size=3|12|Enqueue 30
+FRAME|3|queue|20,30 front_index:0 rear_index:1 highlights:indices=0 colors=green|f=1 r=2 size=2|15|Dequeue 10 (removed from front)
+
+CRITICAL: Use 'queue' type for ALL queue structures, custom or standard!
+
 
 IMPORTANT: For graph algorithms, ALWAYS show the GRAPH structure (nodes + edges), NOT arrays.
 
@@ -277,6 +355,13 @@ async def generate_simple_visualization(
         
         ai_text = response.text.strip()
         logger.info(f"AI returned {len(ai_text)} characters")
+        
+        # DEBUG: Print AI's raw output to terminal
+        print("\n" + "="*80)
+        print("AI RAW OUTPUT (FRAMES):")
+        print("="*80)
+        print(ai_text)
+        print("="*80 + "\n")
         
         # Parse text into JSON
         result = parse_ai_text_output(ai_text)

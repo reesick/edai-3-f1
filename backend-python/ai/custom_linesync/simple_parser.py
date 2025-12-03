@@ -25,15 +25,24 @@ def parse_array_data(data: str) -> Dict[str, Any]:
     parts = data.split(' highlights:')
     values_str = parts[0]
     
-    # Parse values - detect if float or int
+    # Parse values - detect if float, int, or string
     values = []
     for x in values_str.split(','):
-        if x.strip():
+        x_clean = x.strip()
+        # Skip empty values (handles "10, , , ," format from AI)
+        if not x_clean or x_clean.lower() in ['', 'null', 'none']:
+            continue
+        try:
             # Check if float (has decimal point) or int
-            if '.' in x:
-                values.append(float(x.strip()))
+            if '.' in x_clean:
+                values.append(float(x_clean))
             else:
-                values.append(int(x.strip()))
+                values.append(int(x_clean))
+        except ValueError:
+            # Not a number - treat as string (for stack operators like '+', '*', '(')
+            # Only skip if it looks like metadata (contains ':' or '=')
+            if ':' not in x_clean and '=' not in x_clean:
+                values.append(x_clean)  # Add as string
     
     # Parse highlights if present
     highlight_indices = []
@@ -325,14 +334,49 @@ def parse_linkedlist_data(data: str) -> List[Dict[str, Any]]:
     return nodes
 
 
-def parse_stack_data(data: str) -> List[int]:
-    """Parse stack: '5,3,8' (top to bottom) -> [5,3,8]"""
-    return parse_array_data(data)
+def parse_stack_data(data: str) -> Dict[str, Any]:
+    """Parse stack: '5,3,8' (top to bottom) -> [5,3,8] OR '+,*,(' -> ['+','*','(']"""
+    print(f"\n[STACK PARSER] Input: '{data}'")
+    result = parse_array_data(data)
+    print(f"[STACK PARSER] Output values: {result['values']}")
+    return result
 
 
-def parse_queue_data(data: str) -> List[int]:
-    """Parse queue: '1,2,3,4' (front to rear) -> [1,2,3,4]"""
-    return parse_array_data(data)
+def parse_queue_data(data: str) -> Dict[str, Any]:
+    """
+    Parse queue with front/rear indices: '1,2,3,4 front_index:0 rear_index:3'
+    
+    Returns dict with values, front_index, rear_index, and highlights
+    """
+    if not data or data == 'null':
+        return {"name": "queue", "values": [], "type": "int", "front_index": 0, "rear_index": 0, "highlights": {"indices": [], "colors": [], "labels": []}}
+    
+    # Extract front_index and rear_index if present
+    front_index = 0
+    rear_index = 0
+    
+    if 'front_index:' in data:
+        match = re.search(r'front_index:(\d+)', data)
+        if match:
+            front_index = int(match.group(1))
+    
+    if 'rear_index:' in data:
+        match = re.search(r'rear_index:(\d+)', data)
+        if match:
+            rear_index = int(match.group(1))
+    
+    # Remove front/rear metadata for array parsing
+    clean_data = re.sub(r'front_index:\d+', '', data)
+    clean_data = re.sub(r'rear_index:\d+', '', clean_data).strip()
+    
+    # Parse array data (handles values and highlights)
+    array_data = parse_array_data(clean_data)
+    
+    # Add queue-specific fields
+    array_data["front_index"] = front_index
+    array_data["rear_index"] = rear_index if rear_index > 0 else (len(array_data["values"]) - 1 if array_data["values"] else 0)
+    
+    return array_data
 
 
 def build_frame_from_line(line: str, frame_id: int) -> Dict[str, Any]:
@@ -391,14 +435,23 @@ def build_frame_from_line(line: str, frame_id: int) -> Dict[str, Any]:
         else:
             print(f"\n>>> FRAME BUILDER: No linkedlist nodes parsed, skipping")
     elif ds_type == 'stack':
-        frame["stacks"] = [{
+        stack_data = parse_stack_data(data)
+        stack_frame = {
             "name": "stk",
-            "elements": parse_stack_data(data)
-        }]
+            "values": stack_data["values"],
+            "highlights": stack_data.get("highlights", {"indices": [], "colors": [], "labels": []})
+        }
+        frame["stacks"] = [stack_frame]
+        print(f"[FRAME BUILDER] Stack frame created: {stack_frame}")
+
     elif ds_type == 'queue':
+        queue_data = parse_queue_data(data)
         frame["queues"] = [{
             "name": "q",
-            "elements": parse_queue_data(data)
+            "values": queue_data["values"],
+            "front_index": queue_data.get("front_index", 0),
+            "rear_index": queue_data.get("rear_index", len(queue_data["values"]) - 1 if queue_data["values"] else 0),
+            "highlights": queue_data.get("highlights", {"indices": [], "colors": [], "labels": []})
         }]
     
     return frame, int(line_num.strip())
