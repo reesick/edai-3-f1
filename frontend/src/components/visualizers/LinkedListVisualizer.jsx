@@ -12,22 +12,22 @@ const LinkedListVisualizer = ({ data }) => {
             <div className="structure-label">{data.name} ({data.type})</div>
             <div className="linkedlist-container">
                 {data.nodes.map((node, index) => {
-                    const hasNext = node.next_id !== null && node.next_id !== undefined;
+                    const hasNext = node.next !== null && node.next !== undefined;
                     const nodeColor = node.highlighted
                         ? (node.color === 'default' ? '#4f9bff' : node.color)
                         : (node.color === 'default' ? '#3498db' : node.color);
 
                     return (
-                        <React.Fragment key={node.id}>
+                        <React.Fragment key={index}>
                             <div
                                 className={`linkedlist-node ${node.highlighted ? 'highlighted' : ''}`}
                                 style={{ backgroundColor: nodeColor }}
                             >
                                 <div className="node-value">{node.value}</div>
-                                {data.head_id === node.id && (
-                                    <div className="node-label head-label"> head</div>
+                                {index === 0 && (
+                                    <div className="node-label head-label">head</div>
                                 )}
-                                {data.tail_id === node.id && (
+                                {index === data.nodes.length - 1 && (
                                     <div className="node-label tail-label">tail</div>
                                 )}
                                 <div className="node-next-box">→</div>
@@ -40,8 +40,10 @@ const LinkedListVisualizer = ({ data }) => {
                                     </svg>
                                 </div>
                             )}
-                            {!hasNext && index < data.nodes.length - 1 && (
-                                <div className="linkedlist-null">NULL</div>
+                            {!hasNext && (
+                                <div className="linkedlist-arrow">
+                                    <div className="linkedlist-null">NULL</div>
+                                </div>
                             )}
                         </React.Fragment>
                     );

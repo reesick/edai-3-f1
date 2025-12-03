@@ -165,6 +165,16 @@ def validate_linkedlist_complete(frames: List[Dict[str, Any]]) -> bool:
     return len(frames) >= 10
 
 
+def validate_linkedlist_complete(frames: List[Dict[str, Any]]) -> bool:
+    """Check if linkedlist operation completed"""
+    if not frames:
+        return False
+    
+    last_desc = frames[-1].get("description", "").lower()
+    # Look for completion indicators
+    return any(word in last_desc for word in ["final", "complete", "result", "done", "finished"])
+
+
 def validate_stack_queue_complete(frames: List[Dict[str, Any]]) -> bool:
     """Check if stack/queue operations completed"""
     return len(frames) >= 10

@@ -113,7 +113,42 @@ Format for tree:
 - structure: parent-child links (0L1 = node 0's left child is node 1, 0R2 = node 0's right child is node 2)
 - DO NOT add extra pipes between values and structure!
 
-For graph (Topological Sort with 6 nodes):
+For linked list operations (format: value1->value2->value3->NULL with highlights):
+
+CRITICAL LINKEDLIST RULES:
+- **ALWAYS show the COMPLETE list in EVERY frame**
+- NEVER show partial fragments or disconnected nodes
+- Only ONE linked list per frame
+- Format: number->number->number->NULL (NO SPACES!)
+- NEVER use multiple "->NULL" in one line
+- Show list changes across FRAMES, not in one line
+- Example WRONG: "1->NULL 2->3->NULL" (TWO lists in one frame!)
+- Example WRONG: "3->NULL" when full list is "1->2->3->4->5" (partial fragment!)
+- Example CORRECT: Frame 1: "1->2->3->4->5->NULL", Frame 2: "2->1->3->4->5->NULL" (COMPLETE lists)
+
+For CREATE/TRAVERSE (print list 1->2->3):
+FRAME|0|linkedlist|1->2->3->NULL highlights:indices=0 colors=green|head=1|5|Create node 1 (head)
+FRAME|1|linkedlist|1->2->3->NULL highlights:indices=1 colors=green|head=1|6|Create node 2
+FRAME|2|linkedlist|1->2->3->NULL highlights:indices=2 colors=green|head=1|7|Create node 3
+FRAME|3|linkedlist|1->2->3->NULL highlights:indices=0 colors=yellow|current=1|10|Traverse: at node 1
+FRAME|4|linkedlist|1->2->3->NULL highlights:indices=1 colors=yellow|current=2|10|Traverse: at node 2
+FRAME|5|linkedlist|1->2->3->NULL highlights:indices=2 colors=yellow|current=3|10|Traverse: at node 3
+
+For REVERSE in groups of K=2 (reverse 1->2->3->4->5):
+IMPORTANT: Show COMPLETE list at EVERY step, not partial fragments!
+FRAME|0|linkedlist|1->2->3->4->5->NULL|k=2|20|Original complete list
+FRAME|1|linkedlist|1->2->3->4->5->NULL highlights:indices=0,1 colors=yellow,yellow|k=2|23|Reversing nodes 1,2 (FULL list shown)
+FRAME|2|linkedlist|2->1->3->4->5->NULL highlights:indices=0,1 colors=green,green|k=2|26|Reversed first pair (FULL list shown)
+FRAME|3|linkedlist|2->1->3->4->5->NULL highlights:indices=2,3 colors=yellow,yellow|k=2|28|Reversing nodes 3,4 (FULL list shown)
+FRAME|4|linkedlist|2->1->4->3->5->NULL highlights:indices=2,3 colors=green,green|k=2|30|Reversed second pair (FULL list shown)
+FRAME|5|linkedlist|2->1->4->3->5->NULL|k=2|32|Final complete list
+
+- Data: "value1->value2->value3->NULL"
+- Highlights: "highlights:indices=0,1,2 colors=yellow,green,red"
+- Colors: yellow=current, green=new/found, red=delete, blue=normal
+- ALWAYS end with "->NULL"
+- Show step-by-step pointer movements
+
 IMPORTANT: For graph algorithms, ALWAYS show the GRAPH structure (nodes + edges), NOT arrays.
 
 Example - Topological Sort of graph with edges: 5→2, 5→0, 4→0, 4→1, 2→3, 3→1

@@ -236,6 +236,14 @@ const CustomCodePage = () => {
                             >
                                 ⏩ Step Forward
                             </button>
+                            <button
+                                onClick={handleRun}
+                                disabled={isRunning}
+                                className="refresh-viz-button"
+                                title="Regenerate visualization"
+                            >
+                                🔄 Refresh
+                            </button>
                             <div className="speed-control">
                                 <label>Speed:</label>
                                 <select

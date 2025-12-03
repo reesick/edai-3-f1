@@ -234,18 +234,94 @@ def parse_graph_data(data: str) -> Dict[str, Any]:
 
 
 def parse_linkedlist_data(data: str) -> List[Dict[str, Any]]:
-    """Parse linked list: '1->2->3->NULL' -> list structure"""
+    """
+    Parse linked list: '1->2->3->NULL highlights:indices=0,1 colors=yellow,green'
+    
+    Handles AI hallucinations like "1->NULL 2->3->NULL" by selecting longest chain
+    
+    Returns list of node dicts with values and optional highlighting
+    """
+    print(f"\n=== LINKEDLIST PARSER DEBUG ===")
+    print(f"Raw input: {data}")
+    
     if not data or data == 'null' or data == 'NULL':
+        print("  -> Empty/NULL data, returning []")
         return []
     
+    # Split data and highlights
+    parts = data.split(' highlights:')
+    list_str = parts[0]
+    print(f"List string (before processing): {list_str}")
+    
+    # Handle AI hallucination: multiple "->NULL" in one line
+    # Example: "1->NULL 2->3->4->NULL" should become "2->3->4"
+    if list_str.count('->NULL') > 1 or list_str.count('-> NULL') > 1:
+        print(f"  WARNING: Multiple ->NULL detected! Selecting longest chain...")
+        # Split by spaces to get separate list fragments
+        fragments = list_str.split()
+        # Remove ->NULL from each and count nodes
+        chains = []
+        for frag in fragments:
+            clean = frag.replace('->NULL', '').replace('-> NULL', '').strip()
+            if clean and clean != 'NULL':
+                node_count = len(clean.split('->'))
+                chains.append((node_count, clean))
+        
+        # Select longest chain
+        if chains:
+            chains.sort(reverse=True)  # Sort by node count descending
+            list_str = chains[0][1]
+            print(f"  -> Selected longest chain: {list_str} ({chains[0][0]} nodes)")
+        else:
+            list_str = ""
+    else:
+        # Normal case: single list, just remove ->NULL
+        list_str = list_str.replace('->NULL', '').replace('-> NULL', '')
+    
+    print(f"List string (final): {list_str}")
+    
+    values = [v.strip() for v in list_str.split('->') if v.strip()]
+    print(f"Parsed values: {values}")
+    
+    # Parse highlights
+    highlight_indices = []
+    highlight_colors = []
+    
+    if len(parts) > 1:
+        highlight_str = parts[1]
+        print(f"Highlight string: {highlight_str}")
+        for segment in highlight_str.split():
+            if segment.startswith('indices='):
+                indices_str = segment.split('=')[1]
+                highlight_indices = [int(i.strip()) for i in indices_str.split(',') if i.strip()]
+            elif segment.startswith('colors='):
+                colors_str = segment.split('=')[1]
+                highlight_colors = [c.strip() for c in colors_str.split(',') if c.strip()]
+        print(f"  Highlight indices: {highlight_indices}")
+        print(f"  Highlight colors: {highlight_colors}")
+    
+    # Build nodes
     nodes = []
-    parts = data.replace('->NULL', '').split('->')
-    for i, val in enumerate(parts):
-        if val.strip():
-            nodes.append({
-                "value": int(val.strip()),
-                "next": i + 1 if i < len(parts) - 1 else None
-            })
+    for i, val in enumerate(values):
+        # Determine color
+        color = "default"
+        if i in highlight_indices:
+            idx_pos = highlight_indices.index(i)
+            if idx_pos < len(highlight_colors):
+                color = highlight_colors[idx_pos]
+        
+        node = {
+            "value": int(val) if val.isdigit() else val,
+            "next": i + 1 if i < len(values) - 1 else None,
+            "highlighted": color != "default",
+            "color": color
+        }
+        nodes.append(node)
+        print(f"  Node {i}: value={node['value']}, next={node['next']}, color={color}")
+    
+    print(f"Total nodes built: {len(nodes)}")
+    print(f"=== END LINKEDLIST PARSER ===\n")
+    
     return nodes
 
 
@@ -300,7 +376,20 @@ def build_frame_from_line(line: str, frame_id: int) -> Dict[str, Any]:
         graph_data = parse_graph_data(data)
         frame["graphs"] = [graph_data]
     elif ds_type == 'linkedlist':
-        frame["linked_lists"] = parse_linkedlist_data(data)
+        nodes = parse_linkedlist_data(data)
+        if nodes:
+            linkedlist_obj = {
+                "name": "list",
+                "type": "singly",
+                "nodes": nodes,
+                "head_id": 0,
+                "tail_id": len(nodes) - 1
+            }
+            frame["linked_lists"] = [linkedlist_obj]
+            print(f"\n>>> FRAME BUILDER: Created linked_lists with {len(nodes)} nodes")
+            print(f">>> head_id: {linkedlist_obj['head_id']}, tail_id: {linkedlist_obj['tail_id']}")
+        else:
+            print(f"\n>>> FRAME BUILDER: No linkedlist nodes parsed, skipping")
     elif ds_type == 'stack':
         frame["stacks"] = [{
             "name": "stk",
