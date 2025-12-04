@@ -72,10 +72,10 @@
 .module-grid {
     display: grid;
     grid-template-columns: 450px 1fr;
-    grid-template-rows: calc(100vh - 200px) 180px;
+    grid-template-rows: 1fr 250px;
     gap: 1rem;
-    height: calc(100vh - 80px);
-    max-height: calc(100vh - 80px);
+    height: calc(100vh - 100px);
+    max-height: calc(100vh - 100px);
 }
 
 .panel {
@@ -98,16 +98,18 @@
     grid-row: 1;
     position: relative;
     overflow-y: auto;
-    overflow-x: auto;
-    min-height: 500px;
-    max-height: calc(100vh - 280px);
+    overflow-x: hidden;
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .terminal-section {
     grid-column: 2;
     grid-row: 2;
-    max-height: 180px;
-    min-height: 180px;
+    max-height: 250px;
+    min-height: 250px;
     overflow-y: auto;
 }
 

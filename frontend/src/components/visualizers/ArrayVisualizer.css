@@ -14,6 +14,14 @@
     text-align: center;
 }
 
+.empty-message {
+    font-size: 14px;
+    color: #64748b;
+    text-align: center;
+    padding: 60px 20px;
+    font-style: italic;
+}
+
 /* BOXES CONTAINER - Horizontal layout */
 .array-boxes-container {
     display: flex;
