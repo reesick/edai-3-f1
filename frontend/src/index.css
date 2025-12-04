@@ -2,7 +2,7 @@
 
 /* ===== THEME VARIABLES ===== */
 :root {
-  /* Light Mode (Default) */
+  /* Light Mode (Keeping for fallback, but main design is dark) */
   --bg-primary: #FFFFFF;
   --bg-secondary: #F5F5F5;
   --bg-card: #FAFAFA;
@@ -12,13 +12,22 @@
   --border: #DDDDDD;
   --shadow: rgba(0, 0, 0, 0.1);
 
-  /* Accent Colors */
-  --accent: #0066FF;
-  --accent-hover: #0052CC;
-  --success: #00CC66;
-  --warning: #FFAA00;
-  --error: #FF3333;
-  --active: #FF6B35;
+  /* New Theme Colors */
+  --theme-bg-gradient: linear-gradient(135deg, #020c1b 0%, #0a192f 100%);
+  --theme-text-heading: #f6f6f6;
+  /* Ivory */
+  --theme-text-body: #8892b0;
+  /* Light Gray */
+  --theme-accent-gold: #D6AF5A;
+  --theme-accent-charcoal: #252525;
+
+  /* Card Gradients */
+  --card-grad-blue-green: linear-gradient(135deg, rgba(10, 50, 60, 0.8), rgba(0, 30, 40, 0.9));
+  --card-grad-teal-cyan: linear-gradient(135deg, rgba(0, 60, 60, 0.8), rgba(0, 40, 40, 0.9));
+  --card-grad-green-teal: linear-gradient(135deg, rgba(10, 60, 40, 0.8), rgba(0, 40, 20, 0.9));
+  --card-grad-blue-gray: linear-gradient(135deg, rgba(30, 40, 60, 0.8), rgba(20, 30, 40, 0.9));
+  --card-grad-yellow-amber: linear-gradient(135deg, rgba(60, 50, 10, 0.8), rgba(40, 30, 0, 0.9));
+  --card-grad-orange-brown: linear-gradient(135deg, rgba(60, 30, 10, 0.8), rgba(40, 20, 0, 0.9));
 
   /* Spacing */
   --space-xs: 4px;
@@ -29,34 +38,36 @@
   --space-2xl: 48px;
 
   /* Typography */
-  --font-base: 14px;
-  --font-sm: 12px;
-  --font-lg: 18px;
-  --font-xl: 24px;
-  --font-2xl: 32px;
+  --font-serif: 'Playfair Display', 'Merriweather', serif;
+  --font-sans: 'Inter', 'Roboto', sans-serif;
+
+  --font-base: 16px;
+  --font-sm: 14px;
+  --font-lg: 20px;
+  --font-xl: 28px;
+  --font-2xl: 48px;
+  --font-3xl: 64px;
 
   /* Layout */
-  --max-width: 1400px;
-  --border-radius: 4px;
+  --max-width: 1600px;
+  /* Wider for split layout */
+  --border-radius: 12px;
+  --border-radius-pill: 50px;
 }
 
-/* Dark Mode */
+/* Dark Mode (Default for this design) */
 [data-theme="dark"] {
-  --bg-primary: #000000;
-  --bg-secondary: #1A1A1A;
-  --bg-card: #111111;
-  --text-primary: #FFFFFF;
-  --text-secondary: #999999;
-  --text-muted: #666666;
-  --border: #333333;
-  --shadow: rgba(255, 255, 255, 0.05);
+  --bg-primary: #020c1b;
+  --bg-secondary: #0a192f;
+  --bg-card: rgba(255, 255, 255, 0.05);
+  --text-primary: #e6f1ff;
+  --text-secondary: #8892b0;
+  --text-muted: #606a86;
+  --border: rgba(255, 255, 255, 0.1);
+  --shadow: rgba(0, 0, 0, 0.3);
 
-  --accent: #3399FF;
-  --accent-hover: #5CAAFF;
-  --success: #00FF88;
-  --warning: #FFCC00;
-  --error: #FF5555;
-  --active: #FF8855;
+  --accent: #64ffda;
+  --accent-hover: #00bfa5;
 }
 
 /* ===== RESET & BASE ===== */
@@ -77,8 +88,28 @@ body {
   transition: background 0.2s, color 0.2s;
 }
 
+/* Force dark theme globally */
+html {
+  background: #020c1b !important;
+}
+
+html[data-theme="dark"],
+html:not([data-theme]) {
+  --bg-primary: #020c1b;
+  --bg-secondary: #0a192f;
+  --bg-card: rgba(255, 255, 255, 0.05);
+  --text-primary: #e6f1ff;
+  --text-secondary: #8892b0;
+  --text-muted: #606a86;
+  --border: rgba(255, 255, 255, 0.1);
+  --shadow: rgba(0, 0, 0, 0.3);
+  --accent: #64ffda;
+  --accent-hover: #00bfa5;
+}
+
 #root {
   min-height: 100vh;
+  background: #020c1b;
 }
 
 /* ===== TYPOGRAPHY ===== */

@@ -1,53 +1,32 @@
-// Linked List Visualizer - Horizontal nodes with arrows
-// Used for linked list operations
-
+// LinkedListVisualizer - Nodes with arrows (simple version)
 import React from 'react';
 import './LinkedListVisualizer.css';
 
 const LinkedListVisualizer = ({ data }) => {
-    if (!data || !data.nodes || data.nodes.length === 0) return null;
+    if (!data || !data.values || data.values.length === 0) return null;
 
     return (
-        <div className="linkedlist-visualizer">
-            <div className="structure-label">{data.name} ({data.type})</div>
-            <div className="linkedlist-container">
-                {data.nodes.map((node, index) => {
-                    const hasNext = node.next !== null && node.next !== undefined;
-                    const nodeColor = node.highlighted
-                        ? (node.color === 'default' ? '#4f9bff' : node.color)
-                        : (node.color === 'default' ? '#3498db' : node.color);
+        <div className="ll-visualizer">
+            <div className="ll-nodes-container">
+                {data.values.map((value, index) => {
+                    const isHighlighted = data.highlights?.indices?.includes(index);
+                    const highlightIndex = data.highlights?.indices?.indexOf(index);
+                    const color = isHighlighted ? (data.highlights.colors[highlightIndex] || '#3498db') : '#2ecc71';
+                    const label = isHighlighted ? data.highlights.labels[highlightIndex] : null;
 
                     return (
                         <React.Fragment key={index}>
-                            <div
-                                className={`linkedlist-node ${node.highlighted ? 'highlighted' : ''}`}
-                                style={{ backgroundColor: nodeColor }}
-                            >
-                                <div className="node-value">{node.value}</div>
-                                {index === 0 && (
-                                    <div className="node-label head-label">head</div>
-                                )}
-                                {index === data.nodes.length - 1 && (
-                                    <div className="node-label tail-label">tail</div>
-                                )}
-                                <div className="node-next-box">→</div>
+                            <div className="ll-node-box">
+                                {label && <div className="ll-label">{label}</div>}
+                                <div className="ll-node" style={{ backgroundColor: color }}>
+                                    {value}
+                                </div>
                             </div>
-                            {hasNext && (
-                                <div className="linkedlist-arrow">
-                                    <svg width="40" height="20" viewBox="0 0 40 20">
-                                        <line x1="0" y1="10" x2="30" y2="10" stroke="#4f9bff" strokeWidth="2" />
-                                        <polygon points="30,10 25,7 25,13" fill="#4f9bff" />
-                                    </svg>
-                                </div>
-                            )}
-                            {!hasNext && (
-                                <div className="linkedlist-arrow">
-                                    <div className="linkedlist-null">NULL</div>
-                                </div>
-                            )}
+                            {index < data.values.length - 1 && <div className="ll-arrow">→</div>}
                         </React.Fragment>
                     );
                 })}
+                <div className="ll-null">NULL</div>
             </div>
         </div>
     );

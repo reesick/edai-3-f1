@@ -5,9 +5,6 @@ import React from 'react';
 import ArrayVisualizer from './ArrayVisualizer';
 import TreeVisualizer from './TreeVisualizer';
 import GraphVisualizer from './GraphVisualizer';
-import LinkedListVisualizer from './LinkedListVisualizer';
-import StackVisualizer from './StackVisualizer';
-import QueueVisualizer from './QueueVisualizer';
 import './VisualizerFactory.css';
 
 const VariablesPanel = ({ variables }) => {
@@ -71,19 +68,19 @@ const VisualizerFactory = ({ frame, currentFrameIndex, totalFrames }) => {
                         <GraphVisualizer key={`graph-${index}`} data={graph} />
                     ))}
 
-                    {/* Linked Lists */}
+                    {/* Linked Lists - Use LinkedListVisualizer (nodes + arrows) */}
                     {frame.linked_lists?.map((list, index) => (
                         <LinkedListVisualizer key={`list-${index}`} data={list} />
                     ))}
 
-                    {/* Stacks */}
+                    {/* Stacks - Use ArrayVisualizer (box style) */}
                     {frame.stacks?.map((stack, index) => (
-                        <StackVisualizer key={`stack-${index}`} data={stack} />
+                        <ArrayVisualizer key={`stack-${index}`} data={stack} />
                     ))}
 
-                    {/* Queues */}
+                    {/* Queues - Use ArrayVisualizer (box style) */}
                     {frame.queues?.map((queue, index) => (
-                        <QueueVisualizer key={`queue-${index}`} data={queue} />
+                        <ArrayVisualizer key={`queue-${index}`} data={queue} />
                     ))}
                 </div>
 
