@@ -1,94 +1,149 @@
 .queue-visualizer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+    min-height: 300px;
+}
+
+.queue-header {
+    display: flex;
+    justify-content: space-between;
     width: 100%;
-    background: rgba(255, 255, 255, 0.02);
-    border-radius: 8px;
-    padding: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    max-width: 800px;
+    margin-bottom: 10px;
+}
+
+.queue-label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #7f8c8d;
+}
+
+.front-label {
+    margin-left: 20px;
+}
+
+.rear-label {
+    margin-right: 20px;
 }
 
 .queue-container {
     display: flex;
-    align-items: center;
+    flex-direction: row;
     gap: 8px;
-    padding: 30px 20px;
-    min-height: 140px;
-    overflow-x: auto;
-    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    border-radius: 8px;
+    background: rgba(52, 152, 219, 0.05);
 }
 
-.queue-element {
+.queue-element-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     position: relative;
-    min-width: 70px;
-    padding: 14px 20px;
-    background: #3498db;
-    border: 2px solid #fff;
-    border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.queue-element.highlighted {
-    background: #4f9bff;
-    animation: queuePulse 0.8s ease-in-out infinite;
-    box-shadow: 0 0 20px #4f9bff;
-}
-
-.queue-value {
-    font-size: 16px;
-    font-weight: 700;
-    color: #fff;
-    text-align: center;
-    font-family: 'Consolas', 'Monaco', monospace;
-}
-
-.queue-index {
-    font-size: 11px;
-    color: #888;
-    text-align: center;
-    margin-top: 4px;
-    font-family: 'Consolas', 'Monaco', monospace;
-}
-
-.queue-label {
+.queue-element-label {
     position: absolute;
-    top: -28px;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 4px 8px;
+    top: -30px;
+    background: rgba(52, 152, 219, 0.2);
+    padding: 4px 12px;
     border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #3498db;
     white-space: nowrap;
 }
 
-.front-label {
-    background: #27ae60;
-    color: #fff;
-    left: 50%;
-    transform: translateX(-50%);
+.queue-element {
+    width: 80px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #2ecc71;
+    border: 3px solid #27ae60;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
 }
 
-.rear-label {
-    background: #e74c3c;
-    color: #fff;
-    left: 50%;
-    transform: translateX(-50%);
+.queue-element.front-element {
+    border-color: #3498db;
+    border-width: 4px;
 }
 
-.queue-empty {
+.queue-element.rear-element {
+    border-color: #f39c12;
+    border-width: 4px;
+}
+
+.queue-value {
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff;
+}
+
+.queue-footer {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 800px;
+    margin-top: 10px;
+}
+
+.operation-label {
+    font-weight: 600;
     font-size: 14px;
-    color: #888;
-    padding: 20px;
-    text-align: center;
-    font-style: italic;
 }
 
-@keyframes queuePulse {
+.dequeue-label {
+    color: #e74c3c;
+    margin-left: 20px;
+}
 
-    0%,
-    100% {
+.enqueue-label {
+    color: #2ecc71;
+    margin-right: 20px;
+}
+
+.empty-queue {
+    padding: 40px 80px;
+    background: rgba(149, 165, 166, 0.2);
+    border: 2px dashed #95a5a6;
+    border-radius: 8px;
+    color: #95a5a6;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+/* Animations */
+@keyframes enqueue-in {
+    from {
+        opacity: 0;
+        transform: translateX(20px) scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes dequeue-out {
+    from {
+        opacity: 1;
         transform: scale(1);
     }
 
-    50% {
-        transform: scale(1.05);
+    to {
+        opacity: 0;
+        transform: translateX(-20px) scale(0.8);
     }
+}
+
+.queue-element-wrapper {
+    animation: enqueue-in 0.4s ease-out;
 }

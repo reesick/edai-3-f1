@@ -6,6 +6,7 @@ from .searching import OPERATIONS as SEARCHING_OPS, CODE_SAMPLES as SEARCHING_SA
 from .trees import OPERATIONS as TREES_OPS, CODE_SAMPLES as TREES_SAMPLES, execute as trees_execute
 from .linkedlist import OPERATIONS as LINKEDLIST_OPS, CODE_SAMPLES as LINKEDLIST_SAMPLES, execute as linkedlist_execute
 from .stack import OPERATIONS as STACK_OPS, CODE_SAMPLES as STACK_SAMPLES, execute as stack_execute
+from .queue import OPERATIONS as QUEUE_OPS, CODE_SAMPLES as QUEUE_SAMPLES, execute as queue_execute
 
 # Module registry
 MODULES = {
@@ -43,6 +44,13 @@ MODULES = {
         "operations": STACK_OPS,
         "code": STACK_SAMPLES,
         "execute": stack_execute,
+    },
+    "queue": {
+        "name": "Queue",
+        "icon": "📬",
+        "operations": QUEUE_OPS,
+        "code": QUEUE_SAMPLES,
+        "execute": queue_execute,
     },
 }
 

@@ -4,6 +4,7 @@ import VisualizerFactory from './visualizers/VisualizerFactory';
 import ArrayVisualizer from './visualizers/ArrayVisualizer';
 import LinkedListVisualizer from './visualizers/LinkedListVisualizer';
 import StackVisualizer from './visualizers/StackVisualizer';
+import QueueVisualizer from './visualizers/QueueVisualizer';
 import './Visualizer.css';
 
 export default function Visualizer({ module, data, highlights = [], controlsProps }) {
@@ -33,6 +34,9 @@ export default function Visualizer({ module, data, highlights = [], controlsProp
             case 'stack':
                 // Use StackVisualizer for stacks (VERTICAL layout)
                 return <StackVisualizer data={data} highlights={highlights} />;
+            case 'queue':
+                // Use QueueVisualizer for queues (HORIZONTAL layout)
+                return <QueueVisualizer data={data} highlights={highlights} />;
             case 'bitmask':
                 return <BitmaskVisualizer data={data} highlights={highlights} />;
             case 'binaryheap':

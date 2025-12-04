@@ -1,39 +1,57 @@
-// Queue Visualizer - Horizontal FIFO queue
-// Used for queue operations
-
 import React from 'react';
 import './QueueVisualizer.css';
 
-const QueueVisualizer = ({ data }) => {
-    if (!data || !data.values) return null;
+export default function QueueVisualizer({ data, highlights = {} }) {
+    // Extract values - handle both {values: [...]} and direct array
+    const values = data?.values || (Array.isArray(data) ? data : []);
 
+    if (!values || values.length === 0) {
+        return (
+            <div className="queue-visualizer">
+                <div className="queue-container">
+                    <div className="empty-queue">EMPTY QUEUE</div>
+                </div>
+            </div>
+        );
+    }
+
+    // Queue displays left-to-right: FRONT ← [...] ← REAR
     return (
         <div className="queue-visualizer">
-            <div className="structure-label">{data.name}</div>
+            <div className="queue-header">
+                <div className="queue-label front-label">FRONT</div>
+                <div className="queue-label rear-label">REAR</div>
+            </div>
+
             <div className="queue-container">
-                {data.values.map((value, index) => {
-                    const isFront = index === data.front_index;
-                    const isRear = index === data.rear_index;
-                    const isHighlighted = data.highlights?.indices?.includes(index);
+                {values.map((value, index) => {
+                    const isHighlighted = highlights.indices?.includes(index);
+                    const color = isHighlighted ? highlights.colors?.[highlights.indices.indexOf(index)] : '#2ecc71';
+                    const label = isHighlighted ? highlights.labels?.[highlights.indices.indexOf(index)] : '';
+                    const isFront = index === 0;
+                    const isRear = index === values.length - 1;
 
                     return (
-                        <div
-                            key={index}
-                            className={`queue-element ${isHighlighted ? 'highlighted' : ''}`}
-                        >
-                            {isFront && <div className="queue-label front-label">FRONT</div>}
-                            {isRear && <div className="queue-label rear-label">REAR</div>}
-                            <div className="queue-value">{value}</div>
-                            <div className="queue-index">{index}</div>
+                        <div key={index} className="queue-element-wrapper">
+                            {label && <div className="queue-element-label">{label}</div>}
+                            <div
+                                className={`queue-element ${isFront ? 'front-element' : ''} ${isRear ? 'rear-element' : ''}`}
+                                style={{
+                                    backgroundColor: color,
+                                    borderColor: color
+                                }}
+                            >
+                                <span className="queue-value">{value}</span>
+                            </div>
                         </div>
                     );
                 })}
-                {data.values.length === 0 && (
-                    <div className="queue-empty">Queue is empty</div>
-                )}
+            </div>
+
+            <div className="queue-footer">
+                <div className="operation-label dequeue-label">← Dequeue</div>
+                <div className="operation-label enqueue-label">Enqueue →</div>
             </div>
         </div>
     );
-};
-
-export default QueueVisualizer;
+}
