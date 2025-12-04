@@ -1,39 +1,56 @@
-// Stack Visualizer - Vertical LIFO stack
-// Used for stack operations
-
 import React from 'react';
 import './StackVisualizer.css';
 
-const StackVisualizer = ({ data }) => {
-    if (!data || !data.values) return null;
+export default function StackVisualizer({ data, highlights = {} }) {
+    // ModulePage passes data as {values: [...], highlights: {...}}
+    // Extract values - handle both {values: [...]} and direct array
+    const values = data?.values || (Array.isArray(data) ? data : []);
 
-    const reversedValues = [...data.values].reverse(); // Top at array end
+    if (!values || values.length === 0) {
+        return (
+            <div className="stack-visualizer">
+                <div className="stack-container">
+                    <div className="empty-stack">
+                        <div className="stack-base">EMPTY STACK</div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Stack displays bottom-to-top, so reverse for visualization
+    // values[0] = bottom, values[n-1] = top
+    const stackElements = [...values].reverse(); // Top element first visually
 
     return (
         <div className="stack-visualizer">
-            <div className="structure-label">{data.name}</div>
             <div className="stack-container">
-                {reversedValues.map((value, index) => {
-                    const actualIndex = data.values.length - 1 - index;
-                    const isHighlighted = data.highlights?.indices?.includes(actualIndex);
-                    const isTop = actualIndex === data.values.length - 1;
+                {stackElements.map((value, visualIndex) => {
+                    // Actual index in original array (before reverse)
+                    const actualIndex = values.length - 1 - visualIndex;
+                    const isHighlighted = highlights.indices?.includes(actualIndex);
+                    const color = isHighlighted ? highlights.colors?.[highlights.indices.indexOf(actualIndex)] : '#2ecc71';
+                    const label = isHighlighted ? highlights.labels?.[highlights.indices.indexOf(actualIndex)] : '';
+                    const isTop = actualIndex === values.length - 1;
 
                     return (
-                        <div
-                            key={index}
-                            className={`stack-element ${isHighlighted ? 'highlighted' : ''} ${isTop ? 'top' : ''}`}
-                        >
-                            <div className="stack-value">{value}</div>
-                            {isTop && <div className="top-label">TOP</div>}
+                        <div key={actualIndex} className="stack-element-wrapper">
+                            {label && <div className="stack-label">{label}</div>}
+                            <div
+                                className={`stack-element ${isTop ? 'top-element' : ''}`}
+                                style={{
+                                    backgroundColor: color,
+                                    borderColor: color
+                                }}
+                            >
+                                <span className="stack-value">{value}</span>
+                            </div>
+                            {isTop && <div className="top-indicator">← TOP</div>}
                         </div>
                     );
                 })}
-                {data.values.length === 0 && (
-                    <div className="stack-empty">Stack is empty</div>
-                )}
+                <div className="stack-base">BOTTOM</div>
             </div>
         </div>
     );
-};
-
-export default StackVisualizer;
+}

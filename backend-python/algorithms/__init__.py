@@ -5,6 +5,7 @@ from .sorting import OPERATIONS as SORTING_OPS, CODE_SAMPLES as SORTING_SAMPLES,
 from .searching import OPERATIONS as SEARCHING_OPS, CODE_SAMPLES as SEARCHING_SAMPLES, execute as searching_execute
 from .trees import OPERATIONS as TREES_OPS, CODE_SAMPLES as TREES_SAMPLES, execute as trees_execute
 from .linkedlist import OPERATIONS as LINKEDLIST_OPS, CODE_SAMPLES as LINKEDLIST_SAMPLES, execute as linkedlist_execute
+from .stack import OPERATIONS as STACK_OPS, CODE_SAMPLES as STACK_SAMPLES, execute as stack_execute
 
 # Module registry
 MODULES = {
@@ -35,6 +36,13 @@ MODULES = {
         "operations": LINKEDLIST_OPS,
         "code": LINKEDLIST_SAMPLES,
         "execute": linkedlist_execute,
+    },
+    "stack": {
+        "name": "Stack",
+        "icon": "📚",
+        "operations": STACK_OPS,
+        "code": STACK_SAMPLES,
+        "execute": stack_execute,
     },
 }
 

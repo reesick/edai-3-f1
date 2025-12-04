@@ -3,6 +3,7 @@ import VisualizerControls from './VisualizerControls';
 import VisualizerFactory from './visualizers/VisualizerFactory';
 import ArrayVisualizer from './visualizers/ArrayVisualizer';
 import LinkedListVisualizer from './visualizers/LinkedListVisualizer';
+import StackVisualizer from './visualizers/StackVisualizer';
 import './Visualizer.css';
 
 export default function Visualizer({ module, data, highlights = [], controlsProps }) {
@@ -27,8 +28,11 @@ export default function Visualizer({ module, data, highlights = [], controlsProp
             case 'searching':
                 return <ArrayVisualizer data={data} highlights={highlights} />;
             case 'linkedlist':
-                // Use LinkedListVisualizer directly (simple structure like searching)
+                // Use LinkedListVisualizer for linked lists (horizontal layout)
                 return <LinkedListVisualizer data={data} highlights={highlights} />;
+            case 'stack':
+                // Use StackVisualizer for stacks (VERTICAL layout)
+                return <StackVisualizer data={data} highlights={highlights} />;
             case 'bitmask':
                 return <BitmaskVisualizer data={data} highlights={highlights} />;
             case 'binaryheap':
